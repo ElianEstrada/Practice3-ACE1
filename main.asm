@@ -85,11 +85,12 @@ inputOptions macro option
 
 ENDM
 
-getInput macro buffer
+getInput macro buffer, buffer2, ind
 
     LOCAL CHARACTER, OUT_INPUT
 
     xor si, si
+    xor di, di
 
 
     CHARACTER: 
@@ -99,8 +100,12 @@ getInput macro buffer
         cmp al, 0dh
         je OUT_INPUT
 
+        mov di, ind
+
         mov buffer[si], al
+        mov buffer2[di], al
         inc si
+        inc ind
         jmp CHARACTER
 
     OUT_INPUT:
@@ -209,15 +214,39 @@ getBuffer macro buffer
 
 ENDM
 
+copy macro bufferO, bufferD
 
-operation1 struct
+    Local COPYB, EXIT
+
+    xor si, si
+    xor cx, cx
+
+    COPYB: 
+
+        cmp bufferO[si], 24h
+        je EXIT
+
+        mov cl, bufferO[si]
+        mov bufferD[si], cl
+        inc si
+
+        jmp COPYB
+
+
+    EXIT:
+    mov bufferD[si], 24h
+
+ENDM
+
+
+operations struct
 
     id db ?, '$'
     operation db 0ah, 45 Dup('$'), 0
     result db 0ah, 10 dup('$'), 0
     status db 00h
 
-operation1 ends
+operations ends
 
 .model small
 
@@ -240,7 +269,18 @@ outMul db ' * ', '$'
 outEq db ' = ', '$'
 operatorF db 0ah, 0ah, 'Operations: ', '$'
 
-op1 operation1<>
+index dw 0000h, 0
+
+op1 operations<>
+op2 operations<>
+op3 operations<>
+op4 operations<>
+op5 operations<>
+op6 operations<>
+op7 operations<>
+op8 operations<>
+op9 operations<>
+op10 operations<>
 
 bufferNumber1 db 5 Dup('$'), 0
 bufferNumber2 db 5 dup('$'), 0
@@ -306,7 +346,7 @@ dxB dw ?, 0
             print calculator
 
             print varInputNum
-            getInput bufferNumber1
+            getInput bufferNumber1, bufferOperation, index
             getNumber bufferNumber1
             mov resultC, ax
 
@@ -327,8 +367,12 @@ dxB dw ?, 0
 
             SUM:
 
+                mov si, index
+                mov bufferOperation[si], 2bh
+                inc index
+
                 print varInputNum
-                getInput bufferNumber2
+                getInput bufferNumber2, bufferOperation, index
                 getNumber bufferNumber2
 
                 add resultC, ax
@@ -336,8 +380,11 @@ dxB dw ?, 0
 
             SUS:
 
+                mov si, index
+                mov bufferOperation[si], 2dh
+                inc index
                 print varInputNum
-                getInput bufferNumber2
+                getInput bufferNumber2, bufferOperation, index
                 getNumber bufferNumber2
 
                 sub resultC, ax
@@ -345,8 +392,12 @@ dxB dw ?, 0
 
             MULT:
                 
+                mov si, index
+                mov bufferOperation[si], 2ah
+                inc index
+
                 print varInputNum
-                getInput bufferNumber2
+                getInput bufferNumber2, bufferOperation, index
                 getNumber bufferNumber2
 
                 imul resultC
@@ -356,8 +407,12 @@ dxB dw ?, 0
                 
             DIVI:
 
+                mov si, index
+                mov bufferOperation[si], 2fh
+                inc index
+
                 print varInputNum
-                getInput bufferNumber2
+                getInput bufferNumber2 bufferOperation, index
                 getNumber bufferNumber2
 
                 mov bx, ax
@@ -374,11 +429,21 @@ dxB dw ?, 0
             getBuffer bufferResult
             print outResult
             print bufferResult
+            
+            mov si, index
+            mov bufferOperation[si], 24h
+
+            mov index, 0000h
+
+            copy bufferOperation, op1.operation
+
+            print op1.operation
 
             mov resultC, 0000h
 
             print keyPress
             inputOptions flagFalse
+
             clear
             jmp MENU2
 
@@ -390,7 +455,7 @@ dxB dw ?, 0
             print varFactorial
 
             print varInputNum
-            getInput bufferNumber1
+            getInput bufferNumber1, bufferOperation, index
             getNumber bufferNumber1
 
             mov bx, ax
@@ -509,13 +574,6 @@ dxB dw ?, 0
 
 
         EXIT:
-
-            ; mov op1.operation[0], 31h
-            ; mov op1.operation[1], 2dh
-            ; mov op1.operation[2], 32h
-            ; mov op1.operation[3], 24h
-
-            ; print op1.operation
 
             mov ah, 4ch
             int 21h

@@ -6,6 +6,45 @@ print macro string
 
 ENDM
 
+createFile macro name
+
+    mov ah, 3ch
+    mov cx, 00h
+    lea dx, name
+
+    int 21h
+
+    mov handle, ax
+
+ENDM
+
+writeFile macro content
+
+    mov ah, 40h
+    mov bx, handle
+    mov cx, LENGTHOF content
+    lea dx, content
+    int 21h
+
+ENDM
+
+openFile macro name
+
+    mov ah, 3dh
+    mov al, 010b
+    lea dx, name
+    int 21h
+
+ENDM
+
+closeFile macro
+
+    mov ah, 3eh
+    mov bx, handle
+    int 21h
+
+ENDM
+
 clear macro
 
     mov ax, 0600h
@@ -162,6 +201,8 @@ getNumber macro buffer
 
 ENDM
 
+;254 /10 = 25.4 ax = 25, dx = 4 + 48 = 52 -> ascii = 4 
+
 
 getBuffer macro buffer
 
@@ -178,10 +219,10 @@ getBuffer macro buffer
         
         test ax, ax
         js NEGATIVE
-
-        div bx                  ;ax -> resultado; dx -> residuo
+                                
+        div bx                  ;ax -> resultado; dx -> residuo; ax = 25, dx = 4, ax= 2, dx = 5  ax = 0; dx = 2
         
-        add dx, 48
+        add dx, 48              ; 4 + 48 = 52 -> 4; 5 +48 = 53 -> 5 2 + 48 50 -> 2
         inc cx
         push dx
 
@@ -234,17 +275,258 @@ copy macro bufferO, bufferD
 
 
     EXIT:
-    mov bufferD[si], 24h
+    mov bufferD[si], 00h 
+
+ENDM
+
+
+idOp macro buffer, num
+
+    mov buffer[0], 4fh
+    mov buffer[1], 50h
+    mov buffer[2], 45h
+    mov buffer[3], num
+    mov buffer[4], 00h
+
+ENDM
+
+saveOp macro
+
+    LOCAL OPS1, OPS2, OPS3, OPS4, OPS5, OPS6, OPS7, OPS8, OPS9, OPS10, EXIT, FILL
+
+    cmp op1.status, 30h
+    je OPS1
+    cmp op2.status, 30h
+    je OPS2
+    cmp op3.status, 30h
+    je OPS3
+    cmp op4.status, 30h
+    je OPS4
+    cmp op5.status, 30h
+    je OPS5
+    cmp op6.status, 30h
+    je OPS6
+    cmp op7.status, 30h
+    je OPS7
+    cmp op8.status, 30h
+    je OPS8
+    cmp op9.status, 30h
+    je OPS9
+    cmp op10.status, 30h
+    je OPS10
+
+    jmp FILL
+
+    OPS1:
+
+        idOp op1.id, 31h
+        copy bufferOperation, op1.operation
+        copy bufferResult, op1.result
+        mov op1.status, 31h
+        jmp EXIT
+
+
+    OPS2:
+
+        idOp op2.id, 32h
+        copy bufferOperation, op2.operation
+        copy bufferResult, op2.result
+        mov op2.status, 31h
+        jmp EXIT
+
+
+    OPS3:
+
+        idOp op3.id, 33h
+        copy bufferOperation, op3.operation
+        copy bufferResult, op3.result
+        mov op3.status, 31h
+        jmp EXIT
+
+
+    OPS4:
+
+        idOp op4.id, 34h
+        copy bufferOperation, op4.operation
+        copy bufferResult, op4.result
+        mov op4.status, 31h
+        jmp EXIT
+
+
+    OPS5:
+
+        idOp op5.id, 35h
+        copy bufferOperation, op5.operation
+        copy bufferResult, op5.result
+        mov op5.status, 31h
+        jmp EXIT
+
+
+    OPS6:
+
+        idOp op6.id, 36h
+        copy bufferOperation, op6.operation
+        copy bufferResult, op6.result
+        mov op6.status, 31h
+        jmp EXIT
+
+
+    OPS7:
+
+        idOp op7.id, 37h
+        copy bufferOperation, op7.operation
+        copy bufferResult, op7.result
+        mov op7.status, 31h
+        jmp EXIT
+
+
+    OPS8:
+
+        idOp op8.id, 38h
+        copy bufferOperation, op8.operation
+        copy bufferResult, op8.result
+        mov op8.status, 31h
+        jmp EXIT
+
+
+    OPS9: 
+
+        idOp op9.id, 39h
+        copy bufferOperation, op9.operation
+        copy bufferResult, op9.result
+        mov op9.status, 31h
+        jmp EXIT
+
+    OPS10:
+
+        idOp op10.id, 30h
+        copy bufferOperation, op10.operation
+        copy bufferResult, op10.result
+        mov op10.status, 31h
+        jmp EXIT
+
+    FILL:
+        print outResult
+
+
+    EXIT: 
+
+
+ENDM
+
+writeStruct macro opS
+
+    writeFile varTra
+    writeFile varTda
+    writeFile opS.id
+    writeFile varTdc
+    writeFile varTda
+    writeFile opS.operation
+    writeFile varTdc
+    writeFile varTda
+    writeFile opS.result
+    writeFile varTdc
+    writeFile varTrc
+
+ENDM
+
+
+reportM macro
+
+    LOCAL OPS1, OPS2, OPS3, OPS4, OPS5, OPS6, OPS7, OPS8, OPS9, OPS10, EXIT, FILL
+
+    cmp op1.status, 31h
+    je OPS1
+    jmp EXIT
+
+    OPS1:
+        
+        writeStruct op1
+
+    cmp op2.status, 31h
+    je OPS2
+    jmp EXIT
+
+    OPS2:
+
+        writeStruct op2
+
+    cmp op3.status, 31h
+    je OPS3
+    jmp EXIT
+
+    OPS3:
+
+        writeStruct op3
+
+    cmp op4.status, 31h
+    je OPS4
+    jmp EXIT
+
+    OPS4:
+
+        writeStruct op4
+
+    cmp op5.status, 31h
+    je OPS5
+    jmp EXIT
+
+    OPS5:
+
+        writeStruct op5    
+
+    cmp op6.status, 31h
+    je OPS6
+    jmp EXIT
+
+    OPS6:
+
+        writeStruct op6
+    
+    cmp op7.status, 31h
+    je OPS7
+    jmp EXIT
+
+    OPS7:
+
+        writeStruct op7
+
+    cmp op8.status, 31h
+    je OPS8
+    jmp EXIT
+
+    OPS8:
+
+        writeStruct op8
+
+    cmp op9.status, 31h
+    je OPS9
+    jmp EXIT
+
+    OPS9: 
+
+        writeStruct op9
+
+    cmp op10.status, 31h
+    je OPS10
+    jmp EXIT
+
+    OPS10:
+
+        writeStruct op10
+
+    EXIT: 
+
 
 ENDM
 
 
 operations struct
 
-    id db ?, '$'
-    operation db 0ah, 45 Dup('$'), 0
-    result db 0ah, 10 dup('$'), 0
-    status db 00h
+    id db 0ah, 10 Dup(0), 0
+    operation db 0ah, 45 Dup(0), 0
+    result db 0ah, 10 dup(0), 0
+    status db 30h, '$'
 
 operations ends
 
@@ -268,6 +550,7 @@ outFacR db ' != ', '$'
 outMul db ' * ', '$'
 outEq db ' = ', '$'
 operatorF db 0ah, 0ah, 'Operations: ', '$'
+outSave db 0ah, 0ah, 'Do you want to save the result? (S/N): ', '$'
 
 index dw 0000h, 0
 
@@ -285,7 +568,7 @@ op10 operations<>
 bufferNumber1 db 5 Dup('$'), 0
 bufferNumber2 db 5 dup('$'), 0
 bufferResult db 10 dup('$'), 0
-bufferOperation db 45 dup('$'), 0
+bufferOperation db 45 dup(0), 0
 
 varFactorial db 0ah, 0ah, '===========Factorial===========', '$'
 menuError db 0ah, 'Please Choose a Valid Option.', '$'
@@ -293,6 +576,20 @@ keyPress db 0ah, 0ah, 'Press any key to continue...','$'
 flagTrue db 31h, '$'
 flagFalse db 30h, '$'
 isNegative db ?, '$'
+
+varHtml db '<!DOCTYPE html>', 0ah, '<html>', 0ah, '<head>', 0ah, '<title>', 0ah, 'Operation Report', 0ah, '</title>', 0ah, '<link rel= "stylesheet" href= "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">', 0ah, '</head>', 0ah, '<body class= "container grey darken-4 white-text">', 0ah, '<h1> <center> Operations </center> </h1>', 0ah, 0
+varTable db '<table class = "striped card grey darken-3">', 0ah, '<thead>', 0ah, '<tr>', 0ah, '<th> ID Operation </th>', 0ah, '<th> Operation </th>', 0ah, '<th> Result </th>', 0ah,  '</tr>', 0ah,'</thead>', 0ah, '<tbody>', 0ah, 0
+varTra db '<tr>', 0ah, 0
+varTrc db '</tr>', 0ah, 0
+varTda db '<td> ', 0
+varTdc db ' </td>', 0ah, 0
+varTbodyc db '</tbody>', 0ah, 0
+varTablec db '</table>', 0ah, 0
+varBodyc db '</body>', 0ah, 0
+varHtmlc db '</html>', 0ah, 0
+
+handle dw ?, 0
+nameFile db 'Report.html ', '$'
 
 axB dw ?, 0
 bxB dw ?, 0
@@ -305,10 +602,7 @@ dxB dw ?, 0
 
         mov dx, @DATA
         mov ds, dx
-        ;mov es, dx
-
-        HEDAR:  
-            
+        mov es, dx
 
         MENU2: 
             clear
@@ -429,16 +723,29 @@ dxB dw ?, 0
             getBuffer bufferResult
             print outResult
             print bufferResult
-            
+
+            print outSave
+            inputOptions flagTrue
+
+            cmp al, 53h
+            je SAVE
+
+            mov index, 0000h
+            mov resultC, 0000h
+
+            print keyPress
+            inputOptions flagFalse
+
+            clear
+            jmp MENU2
+
+        SAVE: 
             mov si, index
             mov bufferOperation[si], 24h
 
+            saveOp
+
             mov index, 0000h
-
-            copy bufferOperation, op1.operation
-
-            print op1.operation
-
             mov resultC, 0000h
 
             print keyPress
@@ -563,6 +870,23 @@ dxB dw ?, 0
             jmp MENU2
 
         CREATE_REPORT:
+
+            print varHtml
+            print varTable
+
+            createFile nameFile
+            writeFile varHtml
+            writeFile varTable
+
+            reportM
+
+            writeFile varTbodyc
+            writeFile varTablec
+            writeFile varBodyc
+            writeFile varHtmlc
+
+            closeFile
+
             jmp EXIT
 
         ERROR_MENU:

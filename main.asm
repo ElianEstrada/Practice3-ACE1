@@ -462,7 +462,7 @@ saveOp macro
         jmp EXIT
 
     FILL:
-        print outResult
+        print structFill
 
 
     EXIT: 
@@ -502,8 +502,8 @@ saveOpF macro
         copy bufferOperation, op1.operation
         copy bufferResult, op1.result
         mov op1.status, 31h
-        print op1.id
-        print op1.result
+        ;print op1.id
+        ;print op1.result
         jmp EXIT
 
 
@@ -587,7 +587,7 @@ saveOpF macro
         jmp EXIT
 
     FILL:
-        print outResult
+        ;print outResult
         print structFill
 
 
@@ -1033,7 +1033,7 @@ siB dw ?, 0
 
                 print varOperationF
                 print bufferID
-                inputOptions flagFalse
+                ;inputOptions flagFalse
                 print outResult
                 print bufferResult
 
@@ -1412,7 +1412,10 @@ siB dw ?, 0
 
             closeFile
 
-            jmp EXIT
+            print keyPress
+            inputOptions flagFalse
+
+            jmp MENU2
 
         ERROR: 
             print errorCreate

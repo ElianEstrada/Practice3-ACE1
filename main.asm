@@ -6,7 +6,15 @@ print macro string
 
 ENDM
 
+printc macro string
+    mov ah, 02h
+    mov dl, string
+    int 21h
+ENDM
+
 createFile macro name
+
+    LOCAL ERROR, OUT_CREATE
 
     mov ah, 3ch
     mov cx, 00h
@@ -15,10 +23,21 @@ createFile macro name
     int 21h
 
     mov handle, ax
+    jc ERROR
+    jmp OUT_CREATE
+
+    ERROR:
+        print errorCreate
+
+    OUT_CREATE: 
+
+    
 
 ENDM
 
 writeFile macro content
+
+    LOCAL ERROR, OUT_WRITE
 
     mov ah, 40h
     mov bx, handle
@@ -26,22 +45,56 @@ writeFile macro content
     lea dx, content
     int 21h
 
+    jc ERROR
+    jmp OUT_WRITE
+
+    ERROR: 
+        print errorWrite
+
+    OUT_WRITE: 
+
+
 ENDM
 
 openFile macro name
 
+    mov handle, 0000h
+
     mov ah, 3dh
-    mov al, 010b
+    mov al, 000b
     lea dx, name
+    int 21h
+
+    mov handle, ax
+
+ENDM
+
+readFile macro
+
+    mov ah, 3fh
+    mov bx, handle
+    mov cx, LENGTHOF bufferFile
+    lea dx, bufferFile
     int 21h
 
 ENDM
 
 closeFile macro
 
+    LOCAL ERROR, OUT_CLOSE
+
     mov ah, 3eh
     mov bx, handle
     int 21h
+
+    jc ERROR
+    jmp OUT_CLOSE
+
+    ERROR: 
+        print errorClose
+
+    OUT_CLOSE: 
+
 
 ENDM
 
@@ -60,6 +113,7 @@ backup macro
     mov bxB, bx
     mov cxB, cx
     mov dxB, dx
+    mov siB, si
 
 ENDM
 
@@ -78,11 +132,13 @@ restarR macro
     mov bx, bxB
     mov cx, cxB
     mov dx, dxB
+    mov si, siB
 
     xor axB, 0000h
     xor bxB, 0000h
     xor cxB, 0000h
     xor dxB, 0000h
+    xor siB, 0000h
 
 ENDM
 
@@ -90,11 +146,11 @@ operator macro op
 
     cmp op, 2bh
     je SUM
-    cmp op, 2dh
+    cmp op, 2dh 
     je SUS
-    cmp op, 2ah
+    cmp op, 2ah 
     je MULT
-    cmp op, 2fh
+    cmp op, 2fh 
     je DIVI
 
 ENDM
@@ -260,7 +316,7 @@ copy macro bufferO, bufferD
     Local COPYB, EXIT
 
     xor si, si
-    xor cx, cx
+    ;xor cx, cx
 
     COPYB: 
 
@@ -414,6 +470,145 @@ saveOp macro
 
 ENDM
 
+saveOpF macro
+    LOCAL OPS1, OPS2, OPS3, OPS4, OPS5, OPS6, OPS7, OPS8, OPS9, OPS10, EXIT, FILL
+
+    cmp op1.status, 30h
+    je OPS1
+    cmp op2.status, 30h
+    je OPS2
+    cmp op3.status, 30h
+    je OPS3
+    cmp op4.status, 30h
+    je OPS4
+    cmp op5.status, 30h
+    je OPS5
+    cmp op6.status, 30h
+    je OPS6
+    cmp op7.status, 30h
+    je OPS7
+    cmp op8.status, 30h
+    je OPS8
+    cmp op9.status, 30h
+    je OPS9
+    cmp op10.status, 30h
+    je OPS10
+
+    jmp FILL
+
+    OPS1:
+
+        copy bufferID, op1.id
+        copy bufferOperation, op1.operation
+        copy bufferResult, op1.result
+        mov op1.status, 31h
+        print op1.id
+        print op1.result
+        jmp EXIT
+
+
+    OPS2:
+
+        copy bufferID, op2.id
+        copy bufferOperation, op2.operation
+        copy bufferResult, op2.result
+        mov op2.status, 31h
+        jmp EXIT
+
+
+    OPS3:
+
+        copy bufferID, op3.id
+        copy bufferOperation, op3.operation
+        copy bufferResult, op3.result
+        mov op3.status, 31h
+        jmp EXIT
+
+
+    OPS4:
+
+        copy bufferID, op4.id
+        copy bufferOperation, op4.operation
+        copy bufferResult, op4.result
+        mov op4.status, 31h
+        jmp EXIT
+
+
+    OPS5:
+
+        copy bufferID, op5.id
+        copy bufferOperation, op5.operation
+        copy bufferResult, op5.result
+        mov op5.status, 31h
+        jmp EXIT
+
+
+    OPS6:
+
+        copy bufferID, op6.id
+        copy bufferOperation, op6.operation
+        copy bufferResult, op6.result
+        mov op6.status, 31h
+        jmp EXIT
+
+
+    OPS7:
+
+        copy bufferID, op7.id
+        copy bufferOperation, op7.operation
+        copy bufferResult, op7.result
+        mov op7.status, 31h
+        jmp EXIT
+
+
+    OPS8:
+
+        copy bufferID, op8.id
+        copy bufferOperation, op8.operation
+        copy bufferResult, op8.result
+        mov op8.status, 31h
+        jmp EXIT
+
+
+    OPS9: 
+
+        copy bufferID, op9.id
+        copy bufferOperation, op9.operation
+        copy bufferResult, op9.result
+        mov op9.status, 31h
+        jmp EXIT
+
+    OPS10:
+
+        copy bufferID, op10.id
+        copy bufferOperation, op10.operation
+        copy bufferResult, op10.result
+        mov op10.status, 31h
+        jmp EXIT
+
+    FILL:
+        print outResult
+        print structFill
+
+
+    EXIT: 
+
+
+ENDM
+
+cleraBuffer macro buffer
+
+    MOV al, 24h
+
+	LEA di, buffer
+	MOV cx, LENGTHOF buffer
+	CLD
+	REP stosb
+
+
+ENDM
+
+
 writeStruct macro opS
 
     writeFile varTra
@@ -521,9 +716,95 @@ reportM macro
 ENDM
 
 
+isOperable macro
+
+    LOCAL OPERATION, SUM, SUS, MULT, DIVI, EXIT, OUT_OPERABLE
+
+    OPERATION: 
+        pop varNum2
+        pop varNum1
+        pop varOp
+
+        ;print varisop
+        cmp varNum1, 002bh
+        je EXIT
+        cmp varNum1, 002dh
+        je EXIT
+        cmp varNum1, 002ah
+        je Exit
+        cmp varNum1, 002fh
+        je Exit
+
+        cmp varNum2, 002bh
+        je EXIT
+        cmp varNum2, 002dh
+        je EXIT
+        cmp varNum2, 002ah
+        je Exit
+        cmp varNum2, 002fh
+        je Exit
+
+        cmp varOp, 002bh
+        je SUM
+        cmp varOp, 002dh
+        je SUS
+        cmp varOP, 002ah
+        je MULT
+        cmp varOP, 002fh
+        je DIVI
+
+        jmp EXIT
+
+    SUM: 
+        ;print varOpS
+        mov ax, varNum2
+        add varNum1, ax
+        push varNum1
+
+        jmp OPERATION
+
+
+    SUS:
+        ;print varOpSU
+        mov ax, varNum2
+        sub varNum1, ax
+        push varNum1
+
+        jmp OPERATION
+
+
+    MULT:
+        ;print varOpMUL
+        mov ax, varNum1
+        imul varNum2
+        push ax
+
+        jmp OPERATION
+
+    DIVI:
+        ;print varOpDiv
+        mov ax, varNum1
+        cwd
+        idiv varNum2
+        push ax
+
+        jmp OPERATION
+
+    EXIT:
+        push varOp
+        push varNum1
+        push varNum2
+
+    OUT_OPERABLE:
+
+
+
+ENDM
+
+
 operations struct
 
-    id db 0ah, 10 Dup(0), 0
+    id db 0ah, 15 Dup(0), 0
     operation db 0ah, 45 Dup(0), 0
     result db 0ah, 10 dup(0), 0
     status db 30h, '$'
@@ -552,6 +833,10 @@ outEq db ' = ', '$'
 operatorF db 0ah, 0ah, 'Operations: ', '$'
 outSave db 0ah, 0ah, 'Do you want to save the result? (S/N): ', '$'
 
+errorCreate db 0ah, 0ah, 'Error al crear', '$'
+errorWrite db 0ah, 0ah, 'Error al escribir', '$'
+errorClose db 0ah, 0ah, 'Error al cerrar', '$'
+
 index dw 0000h, 0
 
 op1 operations<>
@@ -569,6 +854,9 @@ bufferNumber1 db 5 Dup('$'), 0
 bufferNumber2 db 5 dup('$'), 0
 bufferResult db 10 dup('$'), 0
 bufferOperation db 45 dup(0), 0
+bufferFileName db 15 dup('$'), 0
+bufferFile db 10000 dup('$'), 0
+bufferID db 15 dup('$'), 0
 
 varFactorial db 0ah, 0ah, '===========Factorial===========', '$'
 menuError db 0ah, 'Please Choose a Valid Option.', '$'
@@ -577,7 +865,7 @@ flagTrue db 31h, '$'
 flagFalse db 30h, '$'
 isNegative db ?, '$'
 
-varHtml db '<!DOCTYPE html>', 0ah, '<html>', 0ah, '<head>', 0ah, '<title>', 0ah, 'Operation Report', 0ah, '</title>', 0ah, '<link rel= "stylesheet" href= "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">', 0ah, '</head>', 0ah, '<body class= "container grey darken-4 white-text">', 0ah, '<h1> <center> Operations </center> </h1>', 0ah, 0
+varHtml db '<!DOCTYPE html>', 0ah, '<html>', 0ah, '<head>', 0ah, '<title>', 0ah, 'Operation Report', 0ah, '</title>', 0ah, '<link rel= "stylesheet" href= "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">', 0ah, '</head>', 0ah, '<body class= "container grey darken-4 white-text">', 0ah, '<h1> <center> Practica3 Arqui1 Seccion A </center> </h1>', 0ah, 0
 varTable db '<table class = "striped card grey darken-3">', 0ah, '<thead>', 0ah, '<tr>', 0ah, '<th> ID Operation </th>', 0ah, '<th> Operation </th>', 0ah, '<th> Result </th>', 0ah,  '</tr>', 0ah,'</thead>', 0ah, '<tbody>', 0ah, 0
 varTra db '<tr>', 0ah, 0
 varTrc db '</tr>', 0ah, 0
@@ -588,13 +876,45 @@ varTablec db '</table>', 0ah, 0
 varBodyc db '</body>', 0ah, 0
 varHtmlc db '</html>', 0ah, 0
 
+varOperationF db 0ah, 0ah, 'The Operation: ', '$'
+
+structFill db 'Memory Fill', '$'
+
 handle dw ?, 0
-nameFile db 'Report.html ', '$'
+varNum1 dw ?, 0
+varNum2 dw ?, 0
+varOp dw ?, 0
+
+nameFile db 'Report.htm ', 0
+
+varFileUpload db 0ah, 0ah, '==========File Upload=========', '$'
+varNameFile db 0ah, 0ah, 'Enter path of file: ', '$'
+
+
+varS0 db 'S0', '$'
+varS1 db 'S1', '$'
+varS2 db 'S2', '$'
+varS3 db 'S3', '$'
+varS4 db 'S4', '$'
+varS5 db 'S5', '$'
+varS6 db 'S6', '$'
+varS7 db 'S7', '$'
+varS8 db 'S8', '$'
+varS9 db 'S9', '$'
+varS10 db 'S10', '$'
+varS11 db 'S11', '$'
+varS12 db 'S12', '$'
+varisop db 'isOP', '$'
+varOpS db 'is SUM', '$'
+varOpSU db 'is SUB', '$'
+varOpMUL db 'is MUL', '$'
+varOpDiv db 'is DIV', '$'
 
 axB dw ?, 0
 bxB dw ?, 0
 cxB dw ?, 0
 dxB dw ?, 0
+siB dw ?, 0
 
 .code
 
@@ -606,10 +926,6 @@ dxB dw ?, 0
 
         MENU2: 
             clear
-
-            print op1.status
-
-            
 
             print headerMsg
             print menu
@@ -630,8 +946,216 @@ dxB dw ?, 0
 
 
         FILE_UPLOAD:
-            print entrada
-            jmp EXIT
+
+            print varFileUpload
+
+            print varNameFile
+            getInput bufferFileName, bufferResult, index
+
+            openFile bufferFileName
+            readFile
+            closeFile
+            xor si, si
+
+            STATE0: 
+                ;print varS0
+                cmp bufferFile[si], 0dh                     ;es \r? 
+                je STATE1                                   ;vamos al estado 1
+                cmp bufferFile[si], 0ah
+                je STATE1
+
+                inc si
+                jmp STATE0
+
+            STATE1:
+                inc si
+                cmp bufferFile[si], 3ch                     ;es <
+                je STATE15                                   ;vamos al estado 15
+                cmp bufferFile[si], 24h                     ;es $
+                je STATE12
+
+                jmp STATE1
+
+            STATE15:
+                inc si
+                cmp bufferFile[si], 2fh                     ;es /
+                je STATE13
+                dec si
+                ;dec si
+                jmp STATE2
+
+            STATE13:
+                inc si
+                cmp bufferFile[si], 53h                     ;es S
+                je STATE1                                   ;nos vamos al estado 1
+                cmp bufferFile[si], 73h                     ;es s
+                je STATE1                                   ;nos vamos al estado 1
+
+                cmp bufferFile[si], 52h                     ;es R
+                je STATE1                                   ;nos vamos al estado 1
+                cmp bufferFile[si], 72h                     ;es r
+                je STATE1                                   ;nos vamos al estado 1
+
+                cmp bufferFile[si], 4d                      ;es M
+                je STATE1                                   ;nos vamos al estado 1
+                cmp bufferFile[si], 6d                      ;es m
+                je STATE1                                   ;nos vamos al estado 1
+
+                cmp bufferFile[si], 44h                     ;es D
+                je STATE1                                   ;nos vamos al estado 1
+                cmp bufferFile[si], 64h                     ;es d
+                je STATE1                                   ;nos vamos al estado 1
+
+                cmp bufferFile[si], 76h                     ;es v
+                je STATE1                                   ;nos vamos al estado 1
+
+                xor di, di
+                cmp bufferFile[si], 41h
+                jb STATE1
+                cmp bufferFile[si], 7ah
+                ja STATE1
+
+                jmp STATE14                                 ;no es ninguna de las anteriores nos vamos al estado 14
+
+            STATE14: 
+                
+                pop ax
+                ;mov resultC, ax
+                backup
+                getBuffer bufferResult
+                saveOpF
+                restarR
+
+                xor di, di
+
+                cmp bufferID[0], 24h
+                je STATE16
+
+                print varOperationF
+                print bufferID
+                inputOptions flagFalse
+                print outResult
+                print bufferResult
+
+                inputOptions flagFalse
+
+                cleraBuffer bufferResult    
+                cleraBuffer bufferID
+
+                jmp STATE1
+
+            STATE16:
+                jmp STATE1
+
+            STATE2:
+
+                inc si
+
+                ;print bufferFile[si]
+                cmp bufferFile[si], 53h                     ;es S
+                je STATE4                                   ;nos vamos al estado 4
+                cmp bufferFile[si], 73h                     ;es s
+                je STATE4                                   ;nos vamos al estado 4
+
+                cmp bufferFile[si], 52h                     ;es R
+                je STATE5                                   ;nos vamos al estado 5
+                cmp bufferFile[si], 72h                     ;es r
+                je STATE5                                   ;nos vamos al estado 5
+
+                cmp bufferFile[si], 4d                      ;es M
+                je STATE6                                   ;nos vamos al estado 6
+                cmp bufferFile[si], 6d                      ;es m
+                je STATE6                                   ;nos vamos al estado 6
+
+                cmp bufferFile[si], 44h                     ;es D
+                je STATE7                                   ;nos vamos al estado 7
+                cmp bufferFile[si], 64h                     ;es d
+                je STATE7                                   ;nos vamos al estado 7
+
+                cmp bufferFile[si], 76h                     ;es v
+                je STATE8                                   ;nos vamos al estado 8
+
+                xor di, di
+                jmp STATE3                                  ;no es ninguna de las anteriores nos vamos al estado 3
+
+
+            STATE3: 
+            
+                cmp bufferFile[si], 3eh                     ;es >
+                je STATE1                                   ;nos vamos al estado 1
+
+                mov bl, bufferFile[si]
+                mov bufferID[di], bl                        ;copiamos al buffer 
+                inc di
+                inc si
+
+                ;print bufferID
+                jmp STATE3
+                
+
+            STATE4:
+                mov dx, 002bh
+                push dx
+                jmp STATE1
+
+            STATE5:
+                mov dx, 002dh
+                push dx
+                jmp STATE1
+
+            STATE6:
+                mov dx, 002ah
+                push dx
+                jmp STATE1
+
+            STATE7:
+                mov dx, 002fh
+                push dx
+                jmp STATE1
+
+            STATE8:
+                xor di, di
+                cmp bufferFile[si], 3eh
+                je STATE9
+                inc si
+                jmp STATE8
+
+            STATE9:
+                inc si
+                cmp bufferFile[si], 0dh
+                je STATE1
+                cmp bufferFile[si], 0ah
+                je STATE1
+
+            STATE10:
+                ;call show
+                cmp bufferFile[si], 3ch
+                je STATE11
+                mov bl, bufferFile[si]
+                mov bufferNumber1[di], bl
+                inc di
+                inc si
+
+                jmp STATE10
+
+            STATE11: 
+                backup
+                getNumber bufferNumber1
+                push ax
+                cleraBuffer bufferNumber1
+                restarR
+                isOperable
+                dec si
+                jmp STATE1
+
+            STATE12: 
+                cleraBuffer bufferResult
+                cleraBuffer bufferNumber1
+                print keyPress
+                inputOptions flagFalse
+                jmp MENU2
+
+            
 
         CALCULATOR_MODE: 
             
@@ -706,7 +1230,7 @@ dxB dw ?, 0
                 inc index
 
                 print varInputNum
-                getInput bufferNumber2 bufferOperation, index
+                getInput bufferNumber2, bufferOperation, index
                 getNumber bufferNumber2
 
                 mov bx, ax
@@ -871,8 +1395,9 @@ dxB dw ?, 0
 
         CREATE_REPORT:
 
-            print varHtml
-            print varTable
+            ;print varHtml
+            ;print varTable
+
 
             createFile nameFile
             writeFile varHtml
@@ -889,6 +1414,9 @@ dxB dw ?, 0
 
             jmp EXIT
 
+        ERROR: 
+            print errorCreate
+
         ERROR_MENU:
             clear
             print menuError
@@ -903,5 +1431,11 @@ dxB dw ?, 0
             int 21h
 
     main endp
+
+    show proc
+        printc bufferFile[si]
+        inputOptions flagFalse
+        ret
+    show endp
 
 end

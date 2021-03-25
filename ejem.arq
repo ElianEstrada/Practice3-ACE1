@@ -1,0 +1,84 @@
+<OPERACIONES>
+	<operacion1>
+		<div>
+			<valor>8</valor>
+			<valor>
+				<sum>
+					<valor>1</valor>
+					<valor>3</valor>
+				</sum>
+			</valor>
+		</div>
+	</operacion1>
+
+	<operacion2>
+		<res>
+			<valor>4</valor>
+			<valor>3</valor>
+		</res>
+	</operacion2>
+
+	<operacion3>
+		<res>
+			<valor>4</valor>
+			<valor>-3</valor>
+		</res>
+	</operacion3>
+
+	<operacion4>
+		<sum>
+			<valor>
+				<mul>
+					<valor>2</valor>
+					<valor>3</valor>
+				</mul>
+			</valor>
+			<valor>5</valor>
+		</sum>
+	</operacion4>
+
+	<operacion5>
+		<mul>
+			<valor>2</valor>
+			<valor>
+				<sum>
+					<valor>3</valor>
+					<valor>5</valor>
+				</sum>
+			</valor>
+		</mul>
+	</operacion5>
+
+	<operacion6>
+		<sum>
+			<valor>
+				<mul>
+					<valor>2</valor>
+					<valor>
+						<sum>
+							<valor>3</valor>
+							<valor>
+								<res>
+									<valor>5</valor>
+									<valor>
+										<sum>
+											<valor>6</valor>
+											<valor>2</valor>
+										</sum>
+									</valor>
+								</res>
+							</valor>
+						</sum>
+					</valor>
+				</mul>
+			</valor>
+			<valor>
+				<div>
+					<valor>6</valor>
+					<valor>2</valor>
+				</div>
+			</valor>
+		</sum>
+	</operacion6>
+
+</OPERACIONES>

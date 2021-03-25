@@ -1,0 +1,31 @@
+<OPERACIONES>
+   <opf1>
+      <res>
+         <valor>25</valor>
+         <valor>2</valor>
+      </res>
+   </opf1>
+   <opf2>
+      <res>
+         <valor>
+            <res>
+               <valor>2</valor>
+               <valor>2</valor>
+            </res>
+         </valor>
+         <valor>8</valor>
+      </res>
+   </opf2>
+   <opf3>
+      <sum>
+         <valor>2</valor>
+         <valor>
+            <div>
+               <valor>8</valor>
+               <valor>8</valor>
+            </div>
+         </valor>
+      </sum>
+   </opf3>
+</OPERACIONES>
+

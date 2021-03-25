@@ -1,0 +1,13 @@
+<OPERACIONES>
+	<operacion4>
+		<sum>
+			<valor>
+				<mul>
+					<valor>2</valor>
+					<valor>3</valor>
+				</mul>
+			</valor>
+			<valor>5</valor>
+		</sum>
+	</operacion4>
+</OPERACIONES>
